@@ -43,7 +43,7 @@
 #define LCD_RW_PIN      DIO_PIN_2
 
 #define LCD_EN_GROUP    DIO_PIN_GROUP_B
-#define LCD_EN_PIN      DIO_PIN_3
+#define LCD_EN_PIN      DIO_PIN_4
 
 
 //Data pins
