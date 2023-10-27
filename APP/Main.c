@@ -12,6 +12,7 @@ void main (void)
 	L293D_enu_Initialization();
 
     // L293D_enu_SetRotationDirection(L293D_H1, L293D_CCW);
+    DIO_enu_SetPinDiretion(0,0,0);
 
     u32 Counter = 0;
     u8 flag = 0;
@@ -22,7 +23,7 @@ void main (void)
 
         if(flag)
         {
-            L293D_enu_SetRotationSpeed(L293D_H1, 0.1);
+            L293D_enu_TurnOnMotor(L293D_H1, .5);
         }
 
 
