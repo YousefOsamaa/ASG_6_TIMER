@@ -14,6 +14,7 @@ typedef struct
     u8 ClockSelection;
     u8 InterruptMode;
     u8 OCxPinBehavior;
+    f32 DutyCycle;
 
 }TIMER_t;
 

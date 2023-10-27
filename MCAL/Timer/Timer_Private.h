@@ -256,6 +256,8 @@ static ErrorState_t enu_SetTimerMode (u8 Copy_u8_TimerNumber, u8 Copy_u8_TimerMo
 static ErrorState_t enu_SetClockSelection(u8 Copy_u8_TimerNumber, u8 Copy_u8_ClockSelection);
 static ErrorState_t enu_SetInterruptMode(u8 Copy_u8_TimerNumber, u8 Copy_u8_TimerMode, u8 Copy_u8_InterruptMode);
 static ErrorState_t enu_SetOCxBehavior(u8 Copy_u8_TimerNumber, u8 Copy_u8_TimerMode, u8 Copy_u8_OCxPinBehavior);
+static ErrorState_t enu_SetDutyCycleForPWM(u8 Copy_u8_TimerNumber,u8 Copy_u8_TimerMode, u8 Copy_u8_PulseType, f32 Copy_f32_DutyCyclePercentage);
+
 
 
 #endif

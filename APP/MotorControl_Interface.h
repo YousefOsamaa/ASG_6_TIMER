@@ -1,0 +1,8 @@
+#ifndef MOTORCONTROL_INTERFACE_FILE
+#define MOTORCONTROL_INTERFACEFILE
+
+//APIs' prototypes
+
+
+
+#endif

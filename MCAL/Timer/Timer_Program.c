@@ -16,8 +16,9 @@ extern ErrorState_t Timer_enu_Initialization(void)
 {
     u8 Local_u8_ErrorFlag = ES_OK;
     u8 Local_u8_Counter = 0;
+    u8 Local_u8_Counter2 = 0;
 
-    u8 Local_au8_ErrorStates [4] ={0};
+    u8 Local_au8_ErrorStates [5] ={0};
 
     for ( Local_u8_Counter = 0; Local_u8_Counter < Timer_u8_TimerCount; Local_u8_Counter++)
     {
@@ -27,14 +28,21 @@ extern ErrorState_t Timer_enu_Initialization(void)
       Local_au8_ErrorStates[2] = enu_SetInterruptMode(Timer_astr_TimerList[Local_u8_Counter].TimerNumber, Timer_astr_TimerList[Local_u8_Counter].TimerMode, Timer_astr_TimerList[Local_u8_Counter].InterruptMode);
       Local_au8_ErrorStates[3] = enu_SetOCxBehavior(Timer_astr_TimerList[Local_u8_Counter].TimerNumber, Timer_astr_TimerList[Local_u8_Counter].TimerMode ,Timer_astr_TimerList[Local_u8_Counter].OCxPinBehavior);
     
-      if((Local_au8_ErrorStates[0] == ES_NOK) || (Local_au8_ErrorStates[1] == ES_NOK) || (Local_au8_ErrorStates[2] == ES_NOK) || (Local_au8_ErrorStates[3] == ES_NOK))
+      if((Timer_astr_TimerList[Local_u8_Counter].TimerMode == TIMER_FAST_PWM) || (Timer_astr_TimerList[Local_u8_Counter].TimerMode == TIMER_PHASE_PWM) )
       {
-        Local_u8_ErrorFlag = ES_NOK;
+        Local_au8_ErrorStates[4] = enu_SetDutyCycleForPWM(Timer_astr_TimerList[Local_u8_Counter].TimerNumber, Timer_astr_TimerList[Local_u8_Counter].TimerMode, Timer_astr_TimerList[Local_u8_Counter].OCxPinBehavior, Timer_astr_TimerList[Local_u8_Counter].DutyCycle);
       }
+
+      for (Local_u8_Counter2 = 0; Local_u8_Counter2 < 5; Local_u8_Counter2++)  
+      {
+        if(Local_au8_ErrorStates[Local_u8_Counter2] != ES_OK)
+        {
+            Local_u8_ErrorFlag = ES_NOK;
+        }
+      }
+
     }
     
-
-
     return Local_u8_ErrorFlag;
 }
 
@@ -174,135 +182,7 @@ extern ErrorState_t Timer_enu_SetDutyCycleForPWM(u8 Copy_u8_TimerNumber, u8 Copy
 {
     u8 Local_u8_ErrorFlag = ES_NOK;
 
-    if ((Copy_f32_DutyCyclePercentage >= TIMER_DUTYCYCLE_0) && (Copy_f32_DutyCyclePercentage <= TIMER_DUTYCYCLE_100))
-    {
-        switch (Copy_u8_TimerNumber)
-        {
-            case TIMER_0:
-            {
-                if (Copy_u8_TimerMode == TIMER_PHASE_PWM)
-                {
-                    if(Copy_u8_PulseType == TIMER_PHASE_PWM_NON_INVERTING)
-                    {
-                        //Using Duty Cycle Rule for non-inverting fast PWM mode
-                        OCR0 = Copy_f32_DutyCyclePercentage*TIMER_TCNT0_TOP;
-
-                        Local_u8_ErrorFlag = ES_OK;
-                    }
-                    else if (Copy_u8_PulseType == TIMER_PHASE_PWM_INVERTING)
-                    {
-                        //Using Duty Cycle Rule for non inverting fast PWM mode
-                        OCR0 = TIMER_TCNT0_TOP* (1 - Copy_f32_DutyCyclePercentage );
-
-                        Local_u8_ErrorFlag = ES_OK;
-                    }
-                    else
-                    {
-                        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
-                    }
-
-                }
-                else if (Copy_u8_TimerMode == TIMER_FAST_PWM)
-                {
-                    if(Copy_u8_PulseType == TIMER_FAST_PWM_NON_INVERTING)
-                    {
-                        //Using Duty Cycle Rule for non-inverting fast PWM mode
-                        OCR0 = ((Copy_f32_DutyCyclePercentage)*(TIMER_TCNT0_TOP + 1)) - 1;
-
-                        Local_u8_ErrorFlag = ES_OK;
-                    }
-                    else if (Copy_u8_PulseType == TIMER_FAST_PWM_INVERTING)
-                    {
-                        //Using Duty Cycle Rule for non inverting fast PWM mode
-                        OCR0 = TIMER_TCNT0_TOP - ((Copy_f32_DutyCyclePercentage)*(TIMER_TCNT0_TOP + 1));
-
-                        Local_u8_ErrorFlag = ES_OK;
-                    }
-                    else
-                    {
-                        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
-                    }
-                }
-                else
-                {
-                    Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
-                }
-
-                break;
-            }
-
-            case TIMER_1:
-            {
-                
-                break;
-            }
-
-            case TIMER_2:
-            {
-                if (Copy_u8_TimerMode == TIMER_PHASE_PWM)
-                {
-                    if(Copy_u8_PulseType == TIMER_PHASE_PWM_NON_INVERTING)
-                    {
-                        //Using Duty Cycle Rule for non-inverting fast PWM mode
-                        OCR2 = Copy_f32_DutyCyclePercentage*TIMER_TCNT2_TOP;
-
-                        Local_u8_ErrorFlag = ES_OK;
-                    }
-                    else if (Copy_u8_PulseType == TIMER_PHASE_PWM_INVERTING)
-                    {
-                        //Using Duty Cycle Rule for non inverting fast PWM mode
-                        OCR2 = TIMER_TCNT2_TOP* (1 - Copy_f32_DutyCyclePercentage );
-
-                        Local_u8_ErrorFlag = ES_OK;
-                    }
-                    else
-                    {
-                        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
-                    }
-
-                }
-                else if (Copy_u8_TimerMode == TIMER_FAST_PWM)
-                {
-                    if(Copy_u8_PulseType == TIMER_FAST_PWM_NON_INVERTING)
-                    {
-                        //Using Duty Cycle Rule for non-inverting fast PWM mode
-                        OCR2 = ((Copy_f32_DutyCyclePercentage)*(TIMER_TCNT2_TOP + 1)) - 1;
-
-                        Local_u8_ErrorFlag = ES_OK;
-                    }
-                    else if (Copy_u8_PulseType == TIMER_FAST_PWM_INVERTING)
-                    {
-                        //Using Duty Cycle Rule for non inverting fast PWM mode
-                        OCR2 = TIMER_TCNT2_TOP - ((Copy_f32_DutyCyclePercentage)*(TIMER_TCNT2_TOP + 1));
-
-                        Local_u8_ErrorFlag = ES_OK;
-                    }
-                    else
-                    {
-                        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
-                    }
-
-                }
-                else
-                {
-                    Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
-                }
-                
-                break;
-            }
-        
-            default:
-            {
-                Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
-                break;
-            }
-        }
-    }
-    else
-    {
-        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
-    }
-
+    Local_u8_ErrorFlag = enu_SetDutyCycleForPWM(Copy_u8_TimerNumber, Copy_u8_TimerMode, Copy_u8_PulseType, Copy_f32_DutyCyclePercentage);
 
     return Local_u8_ErrorFlag;
 }
@@ -1098,6 +978,142 @@ static ErrorState_t enu_SetOCxBehavior(u8 Copy_u8_TimerNumber, u8 Copy_u8_TimerM
         default:
         Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
         break;
+    }
+
+    return Local_u8_ErrorFlag;
+}
+
+static ErrorState_t enu_SetDutyCycleForPWM(u8 Copy_u8_TimerNumber,u8 Copy_u8_TimerMode, u8 Copy_u8_PulseType, f32 Copy_f32_DutyCyclePercentage)
+{
+    u8 Local_u8_ErrorFlag = ES_NOK;
+
+    if ((Copy_f32_DutyCyclePercentage >= TIMER_DUTYCYCLE_0) && (Copy_f32_DutyCyclePercentage <= TIMER_DUTYCYCLE_100))
+    {
+        switch (Copy_u8_TimerNumber)
+        {
+            case TIMER_0:
+            {
+                if (Copy_u8_TimerMode == TIMER_PHASE_PWM)
+                {
+                    if(Copy_u8_PulseType == TIMER_PHASE_PWM_NON_INVERTING)
+                    {
+                        //Using Duty Cycle Rule for non-inverting fast PWM mode
+                        OCR0 = Copy_f32_DutyCyclePercentage*TIMER_TCNT0_TOP;
+
+                        Local_u8_ErrorFlag = ES_OK;
+                    }
+                    else if (Copy_u8_PulseType == TIMER_PHASE_PWM_INVERTING)
+                    {
+                        //Using Duty Cycle Rule for non inverting fast PWM mode
+                        OCR0 = TIMER_TCNT0_TOP* (1 - Copy_f32_DutyCyclePercentage );
+
+                        Local_u8_ErrorFlag = ES_OK;
+                    }
+                    else
+                    {
+                        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+                    }
+
+                }
+                else if (Copy_u8_TimerMode == TIMER_FAST_PWM)
+                {
+                    if(Copy_u8_PulseType == TIMER_FAST_PWM_NON_INVERTING)
+                    {
+                        //Using Duty Cycle Rule for non-inverting fast PWM mode
+                        OCR0 = ((Copy_f32_DutyCyclePercentage)*(TIMER_TCNT0_TOP + 1)) - 1;
+
+                        Local_u8_ErrorFlag = ES_OK;
+                    }
+                    else if (Copy_u8_PulseType == TIMER_FAST_PWM_INVERTING)
+                    {
+                        //Using Duty Cycle Rule for non inverting fast PWM mode
+                        OCR0 = TIMER_TCNT0_TOP - ((Copy_f32_DutyCyclePercentage)*(TIMER_TCNT0_TOP + 1));
+
+                        Local_u8_ErrorFlag = ES_OK;
+                    }
+                    else
+                    {
+                        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+                    }
+                }
+                else
+                {
+                    Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+                }
+
+                break;
+            }
+
+            case TIMER_1:
+            {
+                
+                break;
+            }
+
+            case TIMER_2:
+            {
+                if (Copy_u8_TimerMode == TIMER_PHASE_PWM)
+                {
+                    if(Copy_u8_PulseType == TIMER_PHASE_PWM_NON_INVERTING)
+                    {
+                        //Using Duty Cycle Rule for non-inverting fast PWM mode
+                        OCR2 = Copy_f32_DutyCyclePercentage*TIMER_TCNT2_TOP;
+
+                        Local_u8_ErrorFlag = ES_OK;
+                    }
+                    else if (Copy_u8_PulseType == TIMER_PHASE_PWM_INVERTING)
+                    {
+                        //Using Duty Cycle Rule for non inverting fast PWM mode
+                        OCR2 = TIMER_TCNT2_TOP* (1 - Copy_f32_DutyCyclePercentage );
+
+                        Local_u8_ErrorFlag = ES_OK;
+                    }
+                    else
+                    {
+                        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+                    }
+
+                }
+                else if (Copy_u8_TimerMode == TIMER_FAST_PWM)
+                {
+                    if(Copy_u8_PulseType == TIMER_FAST_PWM_NON_INVERTING)
+                    {
+                        //Using Duty Cycle Rule for non-inverting fast PWM mode
+                        OCR2 = ((Copy_f32_DutyCyclePercentage)*(TIMER_TCNT2_TOP + 1)) - 1;
+
+                        Local_u8_ErrorFlag = ES_OK;
+                    }
+                    else if (Copy_u8_PulseType == TIMER_FAST_PWM_INVERTING)
+                    {
+                        //Using Duty Cycle Rule for non inverting fast PWM mode
+                        OCR2 = TIMER_TCNT2_TOP - ((Copy_f32_DutyCyclePercentage)*(TIMER_TCNT2_TOP + 1));
+
+                        Local_u8_ErrorFlag = ES_OK;
+                    }
+                    else
+                    {
+                        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+                    }
+
+                }
+                else
+                {
+                    Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+                }
+                
+                break;
+            }
+        
+            default:
+            {
+                Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+                break;
+            }
+        }
+    }
+    else
+    {
+        Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
     }
 
     return Local_u8_ErrorFlag;
