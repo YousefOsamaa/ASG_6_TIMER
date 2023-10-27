@@ -70,7 +70,7 @@ extern ErrorState_t L293D_enu_Initialization (void)
 
             #endif
             
-
+            //Assumes CCW state
             DIO_enu_SetPinValue(L293D_IN1_GROUP, L293D_IN1_PIN, DIO_HIGH);
             DIO_enu_SetPinValue(L293D_IN2_GROUP, L293D_IN2_PIN, DIO_LOW);
             
@@ -78,7 +78,7 @@ extern ErrorState_t L293D_enu_Initialization (void)
             #if  L293D_H1_ROTATION_DIRECTION == L293D_CW
 
             DIO_enu_TogglePinValue(L293D_IN1_GROUP, L293D_IN1_PIN);
-            DIO_enu_TogglePinValue(L293D_IN1_GROUP, L293D_IN1_PIN);
+            DIO_enu_TogglePinValue(L293D_IN2_GROUP, L293D_IN2_PIN);
 
             #endif
              
@@ -143,7 +143,7 @@ extern ErrorState_t L293D_enu_Initialization (void)
 
             #endif
             
-
+            //Assumes CCW state
             DIO_enu_SetPinValue(L293D_IN3_GROUP, L293D_IN3_PIN, DIO_LOW);
             DIO_enu_SetPinValue(L293D_IN4_GROUP, L293D_IN4_PIN, DIO_HIGH);
             #if L293D_H1_ROTATION_DIRECTION == L293D_CW
@@ -178,8 +178,102 @@ extern ErrorState_t L293D_enu_Initialization (void)
     
 }
 
+extern ErrorState_t L293D_enu_SetRotationDirection(u8 Copy_BridgeNumber, u8 Copy_u8_Direction)
+{
+    u8 Local_u8_ErrorFlag = ES_NOK;
 
-//Local functions' implemenations
+    
+    switch (Copy_BridgeNumber)
+    {
+        case L293D_H1:
+        {
+            if (Copy_u8_Direction == L293D_CCW)
+            {
+                
+                DIO_enu_SetPinValue(L293D_IN1_GROUP, L293D_IN1_PIN, DIO_HIGH);
+                DIO_enu_SetPinValue(L293D_IN2_GROUP, L293D_IN2_PIN, DIO_LOW);
+
+                Local_u8_ErrorFlag = ES_OK;
+            }
+            else if (Copy_u8_Direction == L293D_CW)
+            {
+                DIO_enu_SetPinValue(L293D_IN1_GROUP, L293D_IN1_PIN, DIO_LOW);
+                DIO_enu_SetPinValue(L293D_IN2_GROUP, L293D_IN2_PIN, DIO_HIGH);
+
+                Local_u8_ErrorFlag = ES_OK;
+
+            }
+            else
+            {
+                Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+            }
+
+            break;
+        } 
+
+        case L293D_H2:
+        {
+            if (Copy_u8_Direction == L293D_CCW)
+            {
+                DIO_enu_SetPinValue(L293D_IN3_GROUP, L293D_IN3_PIN, DIO_HIGH);
+                DIO_enu_SetPinValue(L293D_IN4_GROUP, L293D_IN4_PIN, DIO_LOW);
+            }
+            else if (Copy_u8_Direction == L293D_CW)
+            {
+                DIO_enu_SetPinValue(L293D_IN3_GROUP, L293D_IN3_PIN, DIO_LOW);
+                DIO_enu_SetPinValue(L293D_IN4_GROUP, L293D_IN4_PIN, DIO_HIGH);
+            }
+            else
+            {
+                Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+            }
+            break;
+        } 
+        
+        default:
+        {
+            Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+
+            break;
+        }
+    }
+    return Local_u8_ErrorFlag;
+}
+
+extern ErrorState_t L293D_enu_SetRotationSpeed (u8 Copy_u8_BridgeNumber, f32 Copy_f32_SpeedPercentage)
+{
+    u8 Local_u8_ErrorFlag = ES_NOK;
+
+    switch (Copy_u8_BridgeNumber)
+    {
+        case L293D_H1:
+        {
+            Timer_enu_SetDutyCycleForPWM(L293D_EN1_TIMER, TIMER_FAST_PWM, TIMER_FAST_PWM_NON_INVERTING, Copy_f32_SpeedPercentage);
+            
+            Local_u8_ErrorFlag =ES_OK;
+
+            break;
+        }
+
+        case L293D_H2:
+        {
+            Timer_enu_SetDutyCycleForPWM(L293D_EN2_TIMER, TIMER_FAST_PWM, TIMER_FAST_PWM_NON_INVERTING, Copy_f32_SpeedPercentage);
+            
+            Local_u8_ErrorFlag =ES_OK;
+            
+            break;
+        }
+
+        default:
+        {
+            Local_u8_ErrorFlag = ES_OUT_OF_RANGE;
+            
+            break;
+        }
+    }
+    
+    return Local_u8_ErrorFlag;
+}
 
 
 
